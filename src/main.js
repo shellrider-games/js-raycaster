@@ -39,24 +39,19 @@ const distanceToWall = (x, y, angle, level, maxDistance, step) => {
     return undefined;
 }
 
-const drawWallSlice = (ctx, x, startY, endY) => {
-    ctx.fillStyle = 'blue';
-    ctx.fillRect(x, startY, 1, endY - startY);
-}
-
 const drawLevel = (level, cam, ctx) => {
+    ctx.fillStyle = 'blue';
     const fovPerColumn = cam.fov/cam.w;
     for(let x = 0; x < cam.w; x++){
         let dir = Math.PI/10;
         const rayAngle = dir+x*fovPerColumn-cam.fov/2;
         const distance = distanceToWall(cam.x, cam.y, rayAngle, level, cam.farClip, 0.05);
         if(!distance) { continue; }
-        console.log()
         let correctedDistance = distance * Math.cos(rayAngle - dir);
         const lineHeight = cam.h/correctedDistance;
         const startY = Math.max(0, Math.floor(cam.h / 2 - lineHeight / 2));
         const endY = Math.min(cam.h, Math.floor(cam.h / 2 + lineHeight / 2));
-        drawWallSlice(ctx, x, startY, endY);
+        ctx.fillRect(x, startY, 1, endY - startY);
     }
 }
 
