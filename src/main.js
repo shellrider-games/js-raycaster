@@ -12,23 +12,40 @@ const getLevel = (w,h, strategy) => {
     };
 }
 
-const getCamera = (x, y) => {
+const getCamera = (x, y, canvas) => {
     return {
         x: x,
-        y: y
+        y: y,
+        w: canvas.width,
+        h: canvas.heigth,
+        fov: 1.23, // about 70 deg
+        farClip: 20
     };
 }
 
-const drawLevel = (level, cam, ctx) => {
-    let tileSize = 16;
-    ctx.fillStyle = "blue";
-    level.tiles.forEach((val, idx) => {
-        if(val > 0) {
-            let x = idx % level.width;
-            let y = Math.floor(idx/level.width);
-            ctx.fillRect(x*tileSize,y*tileSize,tileSize,tileSize);
+const distanceToWall = (x, y, angle, level, maxDistance, step) => {
+    let rayX = x;
+    let rayY = y;
+    for(let d = 0; d < maxDistance; d += step){
+        rayX += Math.cos(angle) * step;
+        rayY += Math.sin(angle) * step;
+        if(rayX < 0 || rayX > level.width || rayY < 0 || rayY > level.heigth){
+            return undefined;
         }
-    })
+        if(level.tiles[Math.floor(rayX) + level.width * Math.floor(rayY)] > 0) {
+            return d;
+        }
+    }
+    return undefined;
+}
+
+const drawLevel = (level, cam, ctx) => {
+    const fovPerColumn = cam.fov/cam.w;
+    for(let x = 0; x < cam.w; x++){
+        let dir = 0;
+        const rayAngle = dir+x*fovPerColumn-cam.fov/2;
+        let distance = castRay(cam.x, cam.y, rayAngle, level, cam.farClip, 0.1);
+    }
 }
 
 const edgeTileStrategy = (x,y,w,h) => {
