@@ -17,7 +17,7 @@ const getCamera = (x, y, canvas) => {
         x: x,
         y: y,
         w: canvas.width,
-        h: canvas.heigth,
+        h: canvas.height,
         fov: 1.23, // about 70 deg
         farClip: 20
     };
@@ -39,12 +39,24 @@ const distanceToWall = (x, y, angle, level, maxDistance, step) => {
     return undefined;
 }
 
+const drawWallSlice = (ctx, x, startY, endY) => {
+    ctx.fillStyle = 'blue';
+    ctx.fillRect(x, startY, 1, endY - startY);
+}
+
 const drawLevel = (level, cam, ctx) => {
     const fovPerColumn = cam.fov/cam.w;
     for(let x = 0; x < cam.w; x++){
-        let dir = 0;
+        let dir = Math.PI/10;
         const rayAngle = dir+x*fovPerColumn-cam.fov/2;
-        let distance = castRay(cam.x, cam.y, rayAngle, level, cam.farClip, 0.1);
+        const distance = distanceToWall(cam.x, cam.y, rayAngle, level, cam.farClip, 0.05);
+        if(!distance) { continue; }
+        console.log()
+        let correctedDistance = distance * Math.cos(rayAngle - dir);
+        const lineHeight = cam.h/correctedDistance;
+        const startY = Math.max(0, Math.floor(cam.h / 2 - lineHeight / 2));
+        const endY = Math.min(cam.h, Math.floor(cam.h / 2 + lineHeight / 2));
+        drawWallSlice(ctx, x, startY, endY);
     }
 }
 
@@ -56,7 +68,7 @@ const startGame = () => {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let level = getLevel(16,12,edgeTileStrategy);
-    const cam = getCamera(7,5);
+    const cam = getCamera(12,10, canvas);
     drawLevel(level, cam, ctx);
 }
 
