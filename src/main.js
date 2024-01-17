@@ -40,6 +40,10 @@ const distanceToWall = (x, y, angle, level, maxDistance, step) => {
 }
 
 const drawLevel = (level, cam, ctx) => {
+    ctx.fillStyle = '#555555';
+    ctx.fillRect(0,0, cam.w, cam.h/2);
+    ctx.fillStyle = '#888888';
+    ctx.fillRect(0,cam.h/2, cam.w, cam.h/2);
     ctx.fillStyle = 'blue';
     const fovPerColumn = cam.fov/cam.w;
     for(let x = 0; x < cam.w; x++){
