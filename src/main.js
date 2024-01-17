@@ -12,7 +12,14 @@ const getLevel = (w,h, strategy) => {
     };
 }
 
-const drawLevel = (level, ctx) => {
+const getCamera = (x, y) => {
+    return {
+        x: x,
+        y: y
+    };
+}
+
+const drawLevel = (level, cam, ctx) => {
     let tileSize = 16;
     ctx.fillStyle = "blue";
     level.tiles.forEach((val, idx) => {
@@ -32,7 +39,8 @@ const startGame = () => {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     let level = getLevel(16,12,edgeTileStrategy);
-    drawLevel(level,ctx);
+    const cam = getCamera(7,5);
+    drawLevel(level, cam, ctx);
 }
 
 window.onload = () => {
