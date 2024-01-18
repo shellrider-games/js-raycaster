@@ -51,6 +51,24 @@ const getLevel = (w,h, strategy) => {
     };
 }
 
+const createStaticObjects = (level) => {
+    const staticObjects = [];
+    if(level.width >= 1 && level.height >= 1 && level.tiles[1 + 1 * level.width] != 0){
+        staticObjects.push({
+            pos: {
+                x: 1.5,
+                y: 1.5
+            },
+            dims: {
+                w: 0.25,
+                h: 0.5
+            },
+            image: "../img/barrel.png"
+        });
+    }
+    return staticObjects;
+}
+
 const getCamera = (x, y, canvas) => {
     return {
         x: x,
@@ -200,6 +218,7 @@ const setupCanvas = () => {
 const startGame = () => {
     setupCanvas();
     gameData.level = getLevel(16,12,edgeTileWithBoxinMiddleStrategy);
+    gameData.staticObjects = createStaticObjects();
     gameData.cam = getCamera(8,10, canvas);
     gameData.lastTimestamp = 0;
     requestAnimationFrame(update);
@@ -260,4 +279,3 @@ window.onload = () => {
     });
     startGame();
 }
-
