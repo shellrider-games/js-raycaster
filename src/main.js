@@ -60,6 +60,10 @@ const getCamera = (x, y, canvas) => {
     };
 }
 
+const intersectsWithWall = (x,y, level) => {
+    return level.tiles[Math.floor(x) + level.width * Math.floor(y)] > 0
+}
+
 const distanceToWall = (x, y, angle, level, maxDistance, step) => {
     let rayX = x;
     let rayY = y;
@@ -68,27 +72,22 @@ const distanceToWall = (x, y, angle, level, maxDistance, step) => {
         y: Math.sin(angle)
     }
     for(let d = 0; d < maxDistance; d += step){
-        rayX += Math.cos(angle) * step;
-
-        if(rayX < 0 || rayX > level.width || rayY < 0 || rayY > level.heigth){
-            return undefined;
-        }
-        if(level.tiles[Math.floor(rayX) + level.width * Math.floor(rayY)] > 0) {
+        rayX += Math.cos(angle) * step;        
+        if(intersectsWithWall(rayX,rayY,level)) {
             return { 
                 distance: d,
                 horizontal: true
             };
         }
         rayY += Math.sin(angle) * step;
-
-        if(rayX < 0 || rayX > level.width || rayY < 0 || rayY > level.heigth){
-            return undefined;
-        }
-        if(level.tiles[Math.floor(rayX) + level.width * Math.floor(rayY)] > 0) {
+        if(intersectsWithWall(rayX,rayY,level)) {
             return { 
                 distance: d,
                 horizontal: false
             };
+        }
+        if(rayX < 0 || rayX > level.width || rayY < 0 || rayY > level.heigth){
+            return undefined;
         }
     }
     return undefined;
@@ -162,6 +161,7 @@ const edgeTileStrategy = (x,y,w,h) => {
 const startGame = () => {
     gameData.canvas = document.getElementById('canvas');
     gameData.ctx = canvas.getContext('2d');
+    gameData.ctx.imageSmoothingEnabled = false;
     gameData.level = getLevel(16,12,edgeTileStrategy);
     gameData.cam = getCamera(12,10, canvas);
     gameData.lastTimestamp = 0;
