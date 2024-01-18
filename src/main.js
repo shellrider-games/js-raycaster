@@ -16,22 +16,10 @@ const clampToLevel = (pos, level) => {
     }
 }
 
-const inputVector = (inputMap) => {
-    let x = inputMap.right - inputMap.left;
-    let y = inputMap.down - inputMap.up;
-    if(x != 0 || y != 0) {
-        let len = Math.sqrt(x*x + y*y);
-        x = x/len;
-        y = y/len;
-    }
-    return {
-        x: x,
-        y: y
-    };
-}
 
-const rotationVector = (inputMap) => {
-    return inputMap.rot_right - inputMap.rot_left;
+
+const edgeTileStrategy = (x,y,w,h) => {
+    return (x === 0 || x === w - 1 || y === 0 || y === h - 1) ? 1 : 0;
 }
 
 const getLevel = (w,h, strategy) => {
@@ -154,8 +142,22 @@ const drawLevel = (level, cam, ctx) => {
     }
 }
 
-const edgeTileStrategy = (x,y,w,h) => {
-    return (x === 0 || x === w - 1 || y === 0 || y === h - 1) ? 1 : 0;
+const inputVector = (inputMap) => {
+    let x = inputMap.right - inputMap.left;
+    let y = inputMap.down - inputMap.up;
+    if(x != 0 || y != 0) {
+        let len = Math.sqrt(x*x + y*y);
+        x = x/len;
+        y = y/len;
+    }
+    return {
+        x: x,
+        y: y
+    };
+}
+
+const rotationVector = (inputMap) => {
+    return inputMap.rot_right - inputMap.rot_left;
 }
 
 const startGame = () => {
