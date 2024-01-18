@@ -63,14 +63,32 @@ const getCamera = (x, y, canvas) => {
 const distanceToWall = (x, y, angle, level, maxDistance, step) => {
     let rayX = x;
     let rayY = y;
+    const rayVec = {
+        x: Math.cos(angle),
+        y: Math.sin(angle)
+    }
     for(let d = 0; d < maxDistance; d += step){
         rayX += Math.cos(angle) * step;
-        rayY += Math.sin(angle) * step;
+
         if(rayX < 0 || rayX > level.width || rayY < 0 || rayY > level.heigth){
             return undefined;
         }
         if(level.tiles[Math.floor(rayX) + level.width * Math.floor(rayY)] > 0) {
-            return d;
+            return { 
+                distance: d,
+                horizontal: true
+            };
+        }
+        rayY += Math.sin(angle) * step;
+
+        if(rayX < 0 || rayX > level.width || rayY < 0 || rayY > level.heigth){
+            return undefined;
+        }
+        if(level.tiles[Math.floor(rayX) + level.width * Math.floor(rayY)] > 0) {
+            return { 
+                distance: d,
+                horizontal: false
+            };
         }
     }
     return undefined;
@@ -118,17 +136,21 @@ const update = (timestamp) => {
 
 const drawLevel = (level, cam, ctx) => {
     drawFloorAndCeiling(cam, ctx);
-    ctx.fillStyle = 'blue';
     const fovPerColumn = cam.fov/cam.w;
     const dir = cam.dir - (Math.PI/2);
     for(let x = 0; x < cam.w; x++){
         const rayAngle = dir+x*fovPerColumn-cam.fov/2;
-        const distance = distanceToWall(cam.x, cam.y, rayAngle, level, cam.farClip, 0.1);
-        if(!distance) { continue; }
+        const hit = distanceToWall(cam.x, cam.y, rayAngle, level, cam.farClip, 0.1)
+        if(!hit) { continue; }
+        const distance = hit.distance;
+
         let correctedDistance = distance * Math.cos(rayAngle - dir);
         const lineHeight = cam.h/correctedDistance;
         const startY = Math.max(0, Math.floor(cam.h / 2 - lineHeight / 2));
         const endY = Math.min(cam.h, Math.floor(cam.h / 2 + lineHeight / 2));
+
+        ctx.fillStyle = hit.horizontal ? '#0000FF' : '#0000BB';
+
         ctx.fillRect(x, startY, 1, endY - startY);
     }
 }
