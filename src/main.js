@@ -22,6 +22,11 @@ const edgeTileStrategy = (x,y,w,h) => {
     return (x === 0 || x === w - 1 || y === 0 || y === h - 1) ? 1 : 0;
 }
 
+const edgeTileWithBoxinMiddleStrategy = (x,y,w,h) => {
+    return (x === 0 || x === w - 1 || y === 0 || y === h - 1 || (x === Math.floor(w/2) && y === Math.floor(h/2))) ? 1 : 0;
+}
+
+
 const getLevel = (w,h, strategy) => {
     const tiles = new Array(w*h).fill(0).map((_,idx) => {
         let x = idx % w;
@@ -164,8 +169,8 @@ const startGame = () => {
     gameData.canvas = document.getElementById('canvas');
     gameData.ctx = canvas.getContext('2d');
     gameData.ctx.imageSmoothingEnabled = false;
-    gameData.level = getLevel(16,12,edgeTileStrategy);
-    gameData.cam = getCamera(12,10, canvas);
+    gameData.level = getLevel(16,12,edgeTileWithBoxinMiddleStrategy);
+    gameData.cam = getCamera(8,11, canvas);
     gameData.lastTimestamp = 0;
     requestAnimationFrame(update);
 }
