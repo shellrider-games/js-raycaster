@@ -9,14 +9,24 @@ const gameData = {
     }
 }
 
-const clampToLevel = (pos, level) => {
-    return {
-        x: Math.min(Math.max(pos.x, 1.5),level.width-1.5),
-        y: Math.min(Math.max(pos.y, 1.5),level.heigth-1.5)
+const resolveCameraMovementAndCollideWithWalls = (pos, translation, level) => {
+    let desiredPos = {
+        x: pos.x + translation.x,
+        y: pos.y + translation.y
     }
+
+    let normalisedTranslation = {
+        x: translation.x / (Math.sqrt(translation.x ** 2 + translation.y ** 2)),
+        y: translation.y / (Math.sqrt(translation.x ** 2 + translation.y ** 2))
+    }
+
+    let safety = 0.75;
+    let safetyX = safety * normalisedTranslation.x;
+    let safetyY = safety * normalisedTranslation.y;
+    return (level.tiles[Math.floor(desiredPos.x + safetyX) +
+        level.width * Math.floor(desiredPos.y + safetyY)] 
+        != 0) ? pos : desiredPos;
 }
-
-
 
 const edgeTileStrategy = (x,y,w,h) => {
     return (x === 0 || x === w - 1 || y === 0 || y === h - 1) ? 1 : 0;
@@ -97,30 +107,45 @@ const drawFloorAndCeiling = (cam, ctx) => {
     ctx.fillRect(0,cam.h/2, cam.w, cam.h/2);
 }
 
+const rotateCamera = (cam, inputMap, delta) => {
+    let rotSpeed = 0.008;
+    let rot = rotationVector(inputMap);
+    cam.dir = (cam.dir + (rot * rotSpeed * delta)) % (2*Math.PI);
+}
+
+const cameraTranslationDirection = (cam, inputMap) => {
+    return {
+        x: (Math.cos(cam.dir) * inputVector(inputMap).x - Math.sin(cam.dir) * inputVector(inputMap).y),
+        y: (Math.sin(cam.dir) * inputVector(inputMap).x + Math.cos(cam.dir) * inputVector(inputMap).y)
+    };
+}
+
+const moveCamera = (cam, inputMap, delta) => {
+    rotateCamera(cam, inputMap, delta);
+    
+    let translateDir = cameraTranslationDirection(cam, inputMap);
+    let movSpeed = 0.004;
+    const nextPosition = resolveCameraMovementAndCollideWithWalls(
+        {
+            x: cam.x,
+            y: cam.y
+        },
+        {
+            x: translateDir.x * movSpeed * delta,
+            y: translateDir.y * movSpeed * delta
+        },
+        gameData.level
+    );
+
+    cam.x = nextPosition.x;
+    cam.y = nextPosition.y;
+}
+
 const update = (timestamp) => {
     let delta = timestamp - gameData.lastTimestamp;
-    let movSpeed = 0.004;
-    let rotSpeed = 0.008;
     gameData.lastTimestamp = timestamp;
-    let rot = rotationVector(gameData.inputMap);
     
-    gameData.cam.dir = (gameData.cam.dir + (rot * rotSpeed * delta)) % (2*Math.PI);
-
-    let vec = {
-        x: (Math.cos(gameData.cam.dir) * inputVector(gameData.inputMap).x - Math.sin(gameData.cam.dir) * inputVector(gameData.inputMap).y),
-        y: (Math.sin(gameData.cam.dir) * inputVector(gameData.inputMap).x + Math.cos(gameData.cam.dir) * inputVector(gameData.inputMap).y)
-    };
-
-    console.log(vec);
-
-    const nextPosition = clampToLevel({
-        x: gameData.cam.x + vec.x * movSpeed * delta,
-        y: gameData.cam.y + vec.y * movSpeed * delta
-    }, gameData.level);
-
-    gameData.cam.x = nextPosition.x;
-    gameData.cam.y = nextPosition.y;
-
+    moveCamera(gameData.cam, gameData.inputMap, delta);
     drawLevel(gameData.level, gameData.cam, gameData.ctx);
 
     requestAnimationFrame(update);
@@ -170,7 +195,7 @@ const startGame = () => {
     gameData.ctx = canvas.getContext('2d');
     gameData.ctx.imageSmoothingEnabled = false;
     gameData.level = getLevel(16,12,edgeTileWithBoxinMiddleStrategy);
-    gameData.cam = getCamera(8,11, canvas);
+    gameData.cam = getCamera(8,10, canvas);
     gameData.lastTimestamp = 0;
     requestAnimationFrame(update);
 }
