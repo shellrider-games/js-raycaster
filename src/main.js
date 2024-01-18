@@ -170,6 +170,7 @@ const drawLevel = (level, cam, ctx) => {
 
         ctx.fillRect(x, startY, 1, endY - startY);
     }
+    
 }
 
 const inputVector = (inputMap) => {
