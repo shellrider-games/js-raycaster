@@ -191,10 +191,14 @@ const rotationVector = (inputMap) => {
     return inputMap.rot_right - inputMap.rot_left;
 }
 
-const startGame = () => {
+const setupCanvas = () => {
     gameData.canvas = document.getElementById('canvas');
     gameData.ctx = canvas.getContext('2d');
     gameData.ctx.imageSmoothingEnabled = false;
+}
+
+const startGame = () => {
+    setupCanvas();
     gameData.level = getLevel(16,12,edgeTileWithBoxinMiddleStrategy);
     gameData.cam = getCamera(8,10, canvas);
     gameData.lastTimestamp = 0;
@@ -203,56 +207,57 @@ const startGame = () => {
 
 window.onload = () => {
     console.log("Window loaded, starting game.");
+    
+    addEventListener("keydown", (ev) => {
+        switch(ev.key) {
+            case "ArrowDown":
+                gameData.inputMap.down = true;
+                break;
+            case "ArrowUp":
+                gameData.inputMap.up = true;
+                break;
+            case "ArrowLeft":
+                gameData.inputMap.left = true;
+                break;
+            case "ArrowRight":
+                gameData.inputMap.right = true;
+                break;
+            case "a":
+                gameData.inputMap.rot_left = true;
+                break;
+            case "d":
+                gameData.inputMap.rot_right = true;
+                break;
+            default:
+                return
+        }
+    });
+    
+    addEventListener("keyup", (ev) => {
+        switch(ev.key) {
+            case "ArrowDown":
+                gameData.inputMap.down = false;
+                break;
+            case "ArrowUp":
+                gameData.inputMap.up = false;
+                break;
+            case "ArrowLeft":
+                gameData.inputMap.left = false;
+                break;
+            case "ArrowRight":
+                gameData.inputMap.right = false;
+                break;
+            case "a":
+                gameData.inputMap.rot_left = false;
+                break;
+            case "d":
+                gameData.inputMap.rot_right = false;
+                break;
+            
+            default:
+                return
+        }
+    });
     startGame();
 }
 
-addEventListener("keydown", (ev) => {
-    switch(ev.key) {
-        case "ArrowDown":
-            gameData.inputMap.down = true;
-            break;
-        case "ArrowUp":
-            gameData.inputMap.up = true;
-            break;
-        case "ArrowLeft":
-            gameData.inputMap.left = true;
-            break;
-        case "ArrowRight":
-            gameData.inputMap.right = true;
-            break;
-        case "a":
-            gameData.inputMap.rot_left = true;
-            break;
-        case "d":
-            gameData.inputMap.rot_right = true;
-            break;
-        default:
-            return
-    }
-});
-
-addEventListener("keyup", (ev) => {
-    switch(ev.key) {
-        case "ArrowDown":
-            gameData.inputMap.down = false;
-            break;
-        case "ArrowUp":
-            gameData.inputMap.up = false;
-            break;
-        case "ArrowLeft":
-            gameData.inputMap.left = false;
-            break;
-        case "ArrowRight":
-            gameData.inputMap.right = false;
-            break;
-        case "a":
-            gameData.inputMap.rot_left = false;
-            break;
-        case "d":
-            gameData.inputMap.rot_right = false;
-            break;
-        
-        default:
-            return
-    }
-});
