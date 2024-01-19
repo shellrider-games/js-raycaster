@@ -53,19 +53,20 @@ const getLevel = (w,h, strategy) => {
 
 const createStaticObjects = (level) => {
     const staticObjects = [];
-    if(level.width >= 1 && level.height >= 1 && level.tiles[1 + 1 * level.width] != 0){
-        staticObjects.push({
-            pos: {
-                x: 1.5,
-                y: 1.5
-            },
-            dims: {
-                w: 0.25,
-                h: 0.5
-            },
-            image: "../img/barrel.png"
-        });
-    }
+    console.log(level);
+    
+    staticObjects.push({
+        pos: {
+            x: 2.5,
+            y: 2.5
+        },
+        dims: {
+            w: 0.25,
+            h: 1
+        },
+        image: "barrel.png"
+    });
+    
     return staticObjects;
 }
 
@@ -173,22 +174,37 @@ const drawLevel = (level, cam, ctx) => {
     drawFloorAndCeiling(cam, ctx);
     const fovPerColumn = cam.fov/cam.w;
     const dir = cam.dir - (Math.PI/2);
+    const distances = new Array(cam.w);
+    
     for(let x = 0; x < cam.w; x++){
         const rayAngle = dir+x*fovPerColumn-cam.fov/2;
         const hit = distanceToWall(cam.x, cam.y, rayAngle, level, cam.farClip, 0.1)
         if(!hit) { continue; }
-        const distance = hit.distance;
-
-        let correctedDistance = distance * Math.cos(rayAngle - dir);
+        distances[x] = hit.distance;
+        let correctedDistance = hit.distance * Math.cos(rayAngle - dir);
         const lineHeight = cam.h/correctedDistance;
         const startY = Math.max(0, Math.floor(cam.h / 2 - lineHeight / 2));
         const endY = Math.min(cam.h, Math.floor(cam.h / 2 + lineHeight / 2));
-
         ctx.fillStyle = hit.horizontal ? '#0000FF' : '#0000BB';
-
         ctx.fillRect(x, startY, 1, endY - startY);
     }
-    
+
+    gameData.staticObjects.forEach(object => {
+        object.angle = Math.atan2(object.pos.y - cam.y, object.pos.x - cam.x) - dir;
+        object.angle = (object.angle + 2 * Math.PI) % (2 * Math.PI);
+        if (object.angle > Math.PI) object.angle -= 2 * Math.PI;
+        object.distance = Math.sqrt((object.pos.x - cam.x) ** 2 + (object.pos.y - cam.y) ** 2);
+    });
+
+    gameData.staticObjects
+        .sort((a, b) => b.distance - a.distance)
+        .forEach((object) => {
+            let objectHeight = cam.h / object.distance * object.dims.h;
+            let objectWidth = objectHeight * (object.dims.w / object.dims.h);
+            let objectScreenX = (object.angle / cam.fov) * cam.w + 0.5 * cam.w - 0.5 * objectWidth;
+            let sprite = document.getElementById(object.image);
+            ctx.drawImage(sprite, objectScreenX, (cam.h - objectHeight) / 2, objectWidth, objectHeight);
+    });
 }
 
 const inputVector = (inputMap) => {
@@ -218,7 +234,7 @@ const setupCanvas = () => {
 const startGame = () => {
     setupCanvas();
     gameData.level = getLevel(16,12,edgeTileWithBoxinMiddleStrategy);
-    gameData.staticObjects = createStaticObjects();
+    gameData.staticObjects = createStaticObjects(gameData.level);
     gameData.cam = getCamera(8,10, canvas);
     gameData.lastTimestamp = 0;
     requestAnimationFrame(update);
