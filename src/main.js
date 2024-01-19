@@ -202,8 +202,19 @@ const drawLevel = (level, cam, ctx) => {
             let objectHeight = cam.h / object.distance * object.dims.h;
             let objectWidth = objectHeight * (object.dims.w / object.dims.h);
             let objectScreenX = (object.angle / cam.fov) * cam.w + 0.5 * cam.w - 0.5 * objectWidth;
+
+            let startCol = Math.floor(objectScreenX);
+            let endCol = Math.ceil(objectScreenX + objectWidth);
+            
             let sprite = document.getElementById(object.image);
-            ctx.drawImage(sprite, objectScreenX, (cam.h - objectHeight) / 2, objectWidth, objectHeight);
+            
+            if(startCol >= 0){
+                let end = Math.min(endCol, distances.length-1);
+                let columns = distances.slice(startCol,end);
+                if (columns.length > 0 && columns.sort()[0] > object.distance){
+                    ctx.drawImage(sprite, objectScreenX, (cam.h - objectHeight) / 2, objectWidth, objectHeight);
+                }
+            }  
     });
 }
 
