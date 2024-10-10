@@ -54,7 +54,6 @@ const getLevel = (w,h, strategy) => {
 const createStaticObjects = (level) => {
     const staticObjects = [];
     console.log(level);
-    
     staticObjects.push({
         pos: {
             x: 2.5,
@@ -67,6 +66,40 @@ const createStaticObjects = (level) => {
         image: "barrel.png"
     });
     
+    staticObjects.push({
+        pos: {
+            x: 3,
+            y: 2.5
+        },
+        dims: {
+            w: 0.25,
+            h: 1
+        },
+        image: "barrel.png"
+    });
+    staticObjects.push({
+        pos: {
+            x: 2.5,
+            y: 3
+        },
+        dims: {
+            w: 0.25,
+            h: 1
+        },
+        image: "barrel.png"
+    });
+    staticObjects.push({
+        pos: {
+            x: 3,
+            y: 10
+        },
+        dims: {
+            w: 0.25,
+            h: 1
+        },
+        image: "barrel.png"
+    });
+
     return staticObjects;
 }
 
